@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include "graph.h"  // This is the header file for the graph class
 
 #define NUM_INSTR_DESTINATIONS 2
 #define NUM_INSTR_SOURCES 4
@@ -70,6 +71,55 @@ INT32 Usage()
 
     return -1;
 }
+/* ===================================================================== */
+// Routine Callbacks
+/* ===================================================================== */
+
+void registerGraph(Graph &g, bool isPull)
+{
+    // TODO: Implement this function
+}
+
+void startLogging()
+{
+    tracing_on = true;
+}
+
+void stopLogging()
+{
+    tracing_on = false;
+}
+
+void initFunc()
+{
+    // TODO
+}
+
+void routineCallback(RTN rtn, void* v)
+{
+
+   std::string rtn_name = RTN_Name(rtn);
+   
+   if (rtn_name.find("PIN_Init") != std::string::npos)
+   {
+      RTN_Replace(rtn, AFUNPTR(initFunc));
+   }
+
+   if (rtn_name.find("PIN_Start") != std::string::npos)
+   {
+      RTN_Replace(rtn, AFUNPTR(startLogging));
+   }
+
+   if (rtn_name.find("PIN_Stop") != std::string::npos)
+   {
+      RTN_Replace(rtn, AFUNPTR(stopLogging));
+   }
+   if (rtn_name.find("PIN_RegisterGraph") != std::string::npos)
+   {
+      RTN_Replace(rtn, AFUNPTR(registerGraph));
+   }
+}
+
 
 /* ===================================================================== */
 // Analysis routines
