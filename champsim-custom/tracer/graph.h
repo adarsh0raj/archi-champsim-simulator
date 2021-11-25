@@ -12,6 +12,17 @@ class Graph {
         int **adj_list;
         int n_nodes;
         int n_edges;
+        bool is_pool;
+
+        void init() {
+            adj_list = new int*[n_nodes];
+            for (int i = 0; i < n_nodes; i++) {
+                adj_list[i] = new int[n_nodes];
+                for (int j = 0; j < n_nodes; j++) {
+                    adj_list[i][j] = 0;
+                }
+            }
+        }
 
         Graph(int n, int e) {
             n_nodes = n;

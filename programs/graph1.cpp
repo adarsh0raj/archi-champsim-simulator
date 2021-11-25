@@ -94,6 +94,8 @@ int main() {
     PIN_Init();
     g.create_random_edges();
 
+    PIN_RegisterGraph(g, false);
+
     int dstData[N_NODES] = {0};
     //random initialize dstdata with values
     for (int i = 0; i < N_NODES; i++) {
@@ -126,9 +128,6 @@ int main() {
     }
 
     PIN_Stop();
-
-    PIN_RegisterGraph(g, true);
-
 
     // Print the adjacency list
     // g.print_adj_list();
