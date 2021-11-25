@@ -6,10 +6,12 @@
  *
  */
 
+#include <algorithm>
 #include <iostream>
-#include <cstdlib>
 #include <vector>
-#include <queue>
+#include <cassert>
+#include <parallel/algorithm>
+#include <omp.h>
 using namespace std;
 
 /* =============================================================== */
@@ -20,7 +22,7 @@ using namespace std;
 class Graph {
     public:
 
-        int adj_list[N_NODES][N_NODES] = {0};
+        int **adj_list;
         int n_nodes;
         int n_edges;
 
@@ -54,8 +56,42 @@ class Graph {
         }
 };
 
+/* dummy functions used by pin */
+void __attribute__((noinline)) __attribute__((optimize("O0"))) PIN_Start()
+{
+    //assert(false); //on successful replacement - this shouldnt be executed
+    asm("");
+}
+
+void __attribute__((noinline)) __attribute__((optimize("O0"))) PIN_Stop()
+{
+    //assert(false);
+    asm("");
+}
+
+void __attribute__((noinline)) __attribute__((optimize("O0"))) PIN_Init()
+{
+    //assert(false); //on successful replacement - this shouldnt be executed
+    asm("");
+}
+
+void __attribute__((noinline)) __attribute__((optimize("O0"))) PIN_RegisterGraph(Graph& g, bool isPull)
+{
+    asm("");
+}
+
 int main() {
     Graph g(N_NODES, (int)(N_NODES*(N_NODES-1)/5));
+    g.adj_list = new int*[N_NODES];
+
+    for (int i = 0; i < N_NODES; i++) {
+        g.adj_list[i] = new int[N_NODES];
+        for (int j = 0; j < N_NODES; j++) {
+            g.adj_list[i][j] = 0;
+        }
+    }
+
+    PIN_Init();
     g.create_random_edges();
 
     int dstData[N_NODES] = {0};
@@ -70,6 +106,7 @@ int main() {
         srcData[i] = rand() % N_NODES;
     }
 
+    PIN_Start();
     // Pull execution for the given graph kernel
     for (int i = 0; i < N_NODES; i++) {
         for (int j = 0; j < N_NODES; j++) {
@@ -87,6 +124,10 @@ int main() {
             }
         }
     }
+
+    PIN_Stop();
+
+    PIN_RegisterGraph(g, true);
 
 
     // Print the adjacency list

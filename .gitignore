@@ -1,2 +1,5 @@
 traces
 .vscode
+champsim-custom/pin.log
+champsim-custom/tracer/pin.log
+champsim-custom/tracer/pin-3.2-81205-gcc-linux/
