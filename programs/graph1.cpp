@@ -12,49 +12,14 @@
 #include <cassert>
 #include <parallel/algorithm>
 #include <omp.h>
+
+#include "graph.h"
+
 using namespace std;
 
 /* =============================================================== */
 #define N_NODES  (1 << 10)      /* The number of nodes in the tree */
 /* =============================================================== */
-
-// Make a class to represent graph
-class Graph {
-    public:
-
-        int **adj_list;
-        int n_nodes;
-        int n_edges;
-
-        Graph(int n, int e) {
-            n_nodes = n;
-            n_edges = e;
-        }
-
-        // Add an edge from u to v
-        void add_edge(int u, int v) {
-            adj_list[u][v] = 1;
-        }
-
-        // Print the adjacency list
-        void print_adj_list() {
-            for (int i = 0; i < n_nodes; i++) {
-                for (int j = 0; j < n_nodes; j++) {
-                    cout << adj_list[i][j] << " ";
-                }
-                cout << endl;
-            }
-        }
-
-        // create randomly edges
-        void create_random_edges() {
-            for (int i = 0; i < n_edges; i++) {
-                int u = rand() % n_nodes;
-                int v = rand() % n_nodes;
-                add_edge(u, v);
-            }
-        }
-};
 
 /* dummy functions used by pin */
 void __attribute__((noinline)) __attribute__((optimize("O0"))) PIN_Start()
@@ -93,6 +58,7 @@ int main() {
 
     PIN_Init();
     g.create_random_edges();
+    g.is_pool = false;
 
     PIN_RegisterGraph(g, false);
 
