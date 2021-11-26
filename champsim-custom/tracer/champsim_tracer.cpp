@@ -15,6 +15,8 @@
 #define NUM_INSTR_DESTINATIONS 2
 #define NUM_INSTR_SOURCES 4
 
+#define NUM_NODES 1024
+
 typedef struct trace_instr_format {
     unsigned long long int ip;  // instruction pointer (program counter) value
 
@@ -28,6 +30,15 @@ typedef struct trace_instr_format {
     unsigned long long int source_memory[NUM_INSTR_SOURCES];           // input memory
 } trace_instr_format_t;
 
+typedef struct graph {
+    unsigned int num_nodes;
+    unsigned int num_edges;
+
+    unsigned int adj_list[NUM_NODES][NUM_NODES];
+    bool is_pull;
+
+} graph_t;
+
 /* ================================================================== */
 // Global variables 
 /* ================================================================== */
@@ -35,12 +46,12 @@ typedef struct trace_instr_format {
 UINT64 instrCount = 0;
 
 FILE* out;
+graph_t graph;
 
 bool output_file_closed = false;
 bool tracing_on = false;
 
 trace_instr_format_t curr_instr;
-Graph *graph;
 
 /* ===================================================================== */
 // Command line switches
@@ -79,16 +90,17 @@ INT32 Usage()
 void registerGraph(Graph &g, bool isPull)
 {
     // TODO: Implement this function
-    graph = new Graph(g.n_nodes, g.n_edges);
-    graph->init();
-    graph->is_pool = isPull;
+    graph.is_pull = isPull;
+    graph.num_nodes = g.n_nodes;
+    graph.num_edges = g.n_edges;
+    
     for (int i = 0; i < g.n_nodes; i++) {
         for (int j = 0; j < g.n_edges; j++) {
-            graph->adj_list[i][j] = g.adj_list[i][j];
+            graph.adj_list[i][j] = g.adj_list[i][j];
         }
     }
     
-    fwrite(graph, sizeof(*graph), 1, out);
+    fwrite(&graph, sizeof(graph_t), 1, out);
 }
 
 void startLogging()
@@ -101,21 +113,21 @@ void stopLogging()
     tracing_on = false;
 }
 
-void initFunc()
-{
-    // TODO: Implement this function
-    return;
-}
+// void initFunc()
+// {
+//     // TODO: Implement this function
+//     return;
+// }
 
 void routineCallback(RTN rtn, void* v)
 {
 
    std::string rtn_name = RTN_Name(rtn);
    
-   if (rtn_name.find("PIN_Init") != std::string::npos)
-   {
-      RTN_Replace(rtn, AFUNPTR(initFunc));
-   }
+//    if (rtn_name.find("PIN_Init") != std::string::npos)
+//    {
+//       RTN_Replace(rtn, AFUNPTR(initFunc));
+//    }
 
    if (rtn_name.find("PIN_Start") != std::string::npos)
    {

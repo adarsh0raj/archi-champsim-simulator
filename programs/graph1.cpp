@@ -11,7 +11,6 @@
 #include <vector>
 #include <cassert>
 #include <parallel/algorithm>
-#include <omp.h>
 
 #include "graph.h"
 

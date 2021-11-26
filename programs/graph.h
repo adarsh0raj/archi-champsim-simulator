@@ -2,8 +2,6 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
-#include <parallel/algorithm>
-#include <omp.h>
 using namespace std;
 
 class Graph {
