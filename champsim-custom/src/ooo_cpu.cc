@@ -5,6 +5,17 @@
 #include <set>
 #include "uncore.h"
 
+#define NUM_NODES 1024
+
+typedef struct graph {
+    unsigned int num_nodes;
+    unsigned int num_edges;
+
+    unsigned int adj_list[NUM_NODES][NUM_NODES];
+    bool is_pull;
+
+} graph_t;
+
 // out-of-order core
 O3_CPU ooo_cpu[NUM_CPUS];
 uint64_t current_core_cycle[NUM_CPUS], stall_cycle[NUM_CPUS];
@@ -14,6 +25,8 @@ int asid_index = 0;
 
 int reg_instruction_pointer = REG_INSTRUCTION_POINTER, reg_flags = REG_FLAGS,
     reg_stack_pointer = REG_STACK_POINTER;
+
+graph_t graph;
 
 void O3_CPU::initialize_core() {}
 
@@ -32,6 +45,20 @@ void O3_CPU::read_from_trace() {
     size_t instr_size =
         knob_cloudsuite ? sizeof(cloudsuite_instr) : sizeof(input_instr);
 
+    size_t graph_size = sizeof(graph_t);
+
+    if (fread(&graph_data, graph_size, 1, trace_file)) {
+
+        graph.num_nodes = graph_data.num_nodes;
+        graph.num_edges = graph_data.num_edges;
+        
+        for(int i=0;i<graph_data.num_nodes;i++) {
+          for(int j=0;j<graph_data.num_edges;j++) {
+            graph.adj_list[i][j] = graph_data.adj_list[i][j];
+          }
+        }
+    }
+
     if (knob_cloudsuite) {
 
       if (!fread(&current_cloudsuite_instr, instr_size, 1, trace_file)) {
@@ -47,7 +74,9 @@ void O3_CPU::read_from_trace() {
                << endl;
           assert(0);
         }
-      } else { // successfully read the trace
+      }
+
+      else { // successfully read the trace
 
         // copy the instruction into the performance model's instruction format
         ooo_model_instr arch_instr;
